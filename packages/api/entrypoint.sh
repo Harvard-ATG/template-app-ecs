@@ -7,7 +7,7 @@ cd /app/packages/database
 case "$1" in
   migrate)
     echo "Running database migrations..."
-    app-migrate upgrade head
+    app-migrate upgrade --revision head
     echo "✓ Migrations completed successfully"
     ;;
   serve)

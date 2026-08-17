@@ -14,7 +14,8 @@ locals {
   tags           = module.constants.default_tags
   route53_zone_name = var.route53_zone_name != "" ? var.route53_zone_name : module.constants.default_route53_zone
   domain_name    = var.domain_name != "" ? var.domain_name : "${var.app_name}.${local.route53_zone_name}"
-  ssm_root       = "arn:aws:ssm:${local.region}:${local.account}:parameter/${local.env}/${local.app_name}"
+  # SSM parameters are stored at /{env}/{app_name}-api/* to match IAM policy from ecs-app module
+  ssm_root       = "arn:aws:ssm:${local.region}:${local.account}:parameter/${local.env}/${local.app_name}-api"
 }
 
 data "aws_caller_identity" "current" {}
@@ -74,6 +75,15 @@ module "ecs_app_api" {
         { "name" : "APP_SECRET_KEY", "valueFrom" : "${local.ssm_root}/session_secret" },
         { "name" : "APP_ANTHROPIC_API_KEY", "valueFrom" : "${local.ssm_root}/anthropic_api_key" },
       ]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = "/ecs/${local.app_name}-api-${local.env}"
+          "awslogs-region"        = local.region
+          "awslogs-stream-prefix" = "ecs"
+          "awslogs-create-group"  = "true"
+        }
+      }
     }
   ]
   network_config = {
@@ -121,7 +131,7 @@ resource "aws_ecs_task_definition" "migration" {
       name      = "migration"
       image     = local.image
       essential = true
-      command   = ["app-migrate", "upgrade", "--revision", "head"]
+      command   = ["migrate"]
       linuxParameters = {
         initProcessEnabled = true
       }
