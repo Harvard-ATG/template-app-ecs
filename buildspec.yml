@@ -1,0 +1,63 @@
+version: 0.2
+
+# Custom buildspec for template-app-ecs
+# Removes Docker Hub dependency - uses unauthenticated pulls from Docker Hub
+# If you hit rate limits (100 pulls per 6 hours), add Docker Hub credentials
+
+env:
+  parameter-store:
+    BUILD_SSH_KEY: ${BUILD_SSH_KEY_SSM_PATH}
+
+phases:
+  pre_build:
+    commands:
+      # Setup SSH for GitHub access
+      - echo "Setting up SSH key for GitHub..."
+      - mkdir -p ~/.ssh
+      - echo "$BUILD_SSH_KEY" > ~/.ssh/id_rsa
+      - chmod 600 ~/.ssh/id_rsa
+      - ssh-keygen -F github.com || ssh-keyscan github.com >> ~/.ssh/known_hosts
+      
+      # Clone repository
+      - echo "Cloning repository..."
+      - GIT_VERSION=${GIT_VERSION:-main}
+      - VERSION_IN_USE_TAG=$(echo $GIT_VERSION | sed 's/[^[:alnum:]._-]/_/g')
+      - git clone --depth 1 --branch $GIT_VERSION $GIT_REPO $CODEBUILD_SRC_DIR/repo
+      - cd $CODEBUILD_SRC_DIR/repo/
+      
+      # Generate tags
+      - COMMIT_HASH=$(git rev-parse HEAD | cut -c 1-7)
+      - IMAGE_TAG=${COMMIT_HASH:=latest}
+      - DATE_TAG=$(date '+%Y-%m-%dT%H-%M-%S')
+      - echo "Image will be tagged with - latest, $IMAGE_TAG, $DATE_TAG, $VERSION_IN_USE_TAG"
+      
+      # Login to ECR
+      - echo "Logging into ECR..."
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_REGISTRY
+
+  build:
+    commands:
+      - echo "Building Docker image..."
+      - cd $CODEBUILD_SRC_DIR/repo/
+      - >
+        docker build --file $DOCKERFILE_PATH
+        --label "org.opencontainers.image.created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+        --label "org.opencontainers.image.revision=$COMMIT_HASH"
+        --label "org.opencontainers.image.version=$VERSION_IN_USE_TAG"
+        --label "org.opencontainers.image.source=$GIT_REPO"
+        --tag $ECR_REPOSITORY_URL:$IMAGE_TAG .
+      
+      # Tag with multiple tags
+      - docker tag $ECR_REPOSITORY_URL:$IMAGE_TAG $ECR_REPOSITORY_URL:latest
+      - docker tag $ECR_REPOSITORY_URL:$IMAGE_TAG $ECR_REPOSITORY_URL:$DATE_TAG
+      - docker tag $ECR_REPOSITORY_URL:$IMAGE_TAG $ECR_REPOSITORY_URL:$VERSION_IN_USE_TAG
+
+  post_build:
+    commands:
+      - echo "Pushing images to ECR..."
+      - docker push $ECR_REPOSITORY_URL:latest
+      - docker push $ECR_REPOSITORY_URL:$IMAGE_TAG
+      - docker push $ECR_REPOSITORY_URL:$DATE_TAG
+      - docker push $ECR_REPOSITORY_URL:$VERSION_IN_USE_TAG
+      - echo "Build completed successfully!"
+      - echo "Images available with tags - latest, $IMAGE_TAG, $DATE_TAG, $VERSION_IN_USE_TAG"

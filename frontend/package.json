@@ -1,0 +1,35 @@
+{
+  "name": "app-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "node server.js",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "gen-types": "node scripts/gen-types.mjs"
+  },
+  "dependencies": {
+    "js-cookie": "^3.0.8",
+    "next": "^16.2.6",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.0",
+    "@types/js-cookie": "^3.0.6",
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "^16.2.6",
+    "openapi-typescript": "^7.13.0",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.9.0"
+  }
+}

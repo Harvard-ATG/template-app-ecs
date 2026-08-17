@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "app_database"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    "sqlmodel>=0.0.38",
+    "sqlalchemy[asyncio]~=2.0.46",
+    "asyncpg~=0.31",
+    "alembic~=1.18",
+    "typer~=0.12",
+    "app_schemas",
+]
+
+[tool.uv.sources]
+app_schemas = { path = "../schemas" }
+
+[project.scripts]
+app-migrate = "app_database.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pyright]
+include = ["src"]
+typeCheckingMode = "standard"

@@ -1,0 +1,64 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: app_user
+      POSTGRES_PASSWORD: dev_password
+      POSTGRES_DB: app_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app_user -d app_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: packages/api/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      APP_ENVIRONMENT: development
+      APP_DB_HOST: postgres
+      APP_DB_USER: app_user
+      APP_DB_PASSWORD: dev_password
+      APP_DB_NAME: app_db
+      APP_SECRET_KEY: dev-secret-key-change-in-prod
+      APP_ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      APP_ALLOWED_ORIGINS: '["http://localhost:3000"]'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      API_BASE_URL: http://api:8000
+      NODE_ENV: production
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:

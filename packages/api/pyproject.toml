@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "app_api"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi~=0.136",
+    "uvicorn[standard]~=0.32",
+    "python-multipart~=0.0.20",
+    "sse-starlette~=2.1",
+    "app_schemas",
+    "app_database",
+    "app_auth",
+    "app_llm",
+]
+
+[tool.uv.sources]
+app_schemas = { path = "../schemas" }
+app_database = { path = "../database" }
+app_auth = { path = "../auth" }
+app_llm = { path = "../llm" }
+
+[dependency-groups]
+dev = [
+    "pyright~=1.1",
+    "pytest~=8.3",
+    "pytest-asyncio~=0.24",
+    "httpx~=0.27",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pyright]
+include = ["src"]
+typeCheckingMode = "standard"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"

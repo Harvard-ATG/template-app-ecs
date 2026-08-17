@@ -1,0 +1,19 @@
+output "ecr_repository_url" {
+  description = "ECR repository URL"
+  value       = module.ecr.repository_url
+}
+
+output "api_service_name" {
+  description = "Name of the API ECS service"
+  value       = module.template_app.api_service_name
+}
+
+output "domain_name" {
+  description = "Domain name for the application"
+  value       = module.template_app.domain_name
+}
+
+output "migration_task_definition_arn" {
+  description = "ARN of the migration task definition"
+  value       = module.template_app.migration_task_definition_arn
+}
