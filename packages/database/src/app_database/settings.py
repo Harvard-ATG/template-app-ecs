@@ -7,7 +7,7 @@ class DatabaseSettings(BaseSettings):
     """Database configuration."""
     
     model_config = SettingsConfigDict(
-        env_prefix="APP_DB_",
+        env_prefix="APP_DATABASE_",
         extra="ignore",
     )
     
