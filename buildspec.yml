@@ -18,11 +18,22 @@ phases:
       - chmod 600 ~/.ssh/id_rsa
       - ssh-keygen -F github.com || ssh-keyscan github.com >> ~/.ssh/known_hosts
       
-      # Clone repository
-      - echo "Cloning repository..."
+      # Convert HTTPS URL to SSH URL for cloning
+      - echo "Preparing repository clone..."
       - GIT_VERSION=${GIT_VERSION:-main}
       - VERSION_IN_USE_TAG=$(echo $GIT_VERSION | sed 's/[^[:alnum:]._-]/_/g')
-      - git clone --depth 1 --branch $GIT_VERSION $GIT_REPO $CODEBUILD_SRC_DIR/repo
+      - |
+        if [[ $GIT_REPO == https://github.com/* ]]; then
+          SSH_REPO=$(echo $GIT_REPO | sed 's|https://github.com/|git@github.com:|')
+          echo "Converted HTTPS to SSH: $SSH_REPO"
+        else
+          SSH_REPO=$GIT_REPO
+          echo "Using provided SSH URL: $SSH_REPO"
+        fi
+      
+      # Clone repository using SSH
+      - echo "Cloning repository..."
+      - git clone --depth 1 --branch $GIT_VERSION $SSH_REPO $CODEBUILD_SRC_DIR/repo
       - cd $CODEBUILD_SRC_DIR/repo/
       
       # Generate tags

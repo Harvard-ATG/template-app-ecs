@@ -10,9 +10,9 @@ variable "app_name" {
 }
 
 variable "app_name_short" {
-  description = "Short application name for resource naming"
+  description = "Short application name for resource naming (max 6 chars to allow for suffixes like -api)"
   type        = string
-  default     = "template-app"
+  default     = "tmpapp"
 }
 
 variable "cluster_name" {

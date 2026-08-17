@@ -116,10 +116,10 @@ resource "aws_elasticache_cluster" "main" {
   snapshot_window          = var.snapshot_window
   maintenance_window       = var.maintenance_window
 
-  # Security
-  at_rest_encryption_enabled = var.at_rest_encryption_enabled
-  transit_encryption_enabled = var.transit_encryption_enabled
-
+  # Security - Note: at_rest_encryption only supported for replication groups, not single-node clusters
+  # at_rest_encryption_enabled is NOT supported for aws_elasticache_cluster
+  # Use aws_elasticache_replication_group if you need encryption at rest
+  
   # Automatic minor version upgrades
   auto_minor_version_upgrade = true
   apply_immediately          = false

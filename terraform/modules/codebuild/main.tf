@@ -70,12 +70,6 @@ resource "aws_codebuild_project" "main" {
       stream_name = "build-log"
     }
   }
-
-  tags = {
-    Environment = var.env
-    Application = var.app_name
-    ManagedBy   = "terraform"
-  }
 }
 
 # GitHub Webhook for automatic builds
@@ -111,12 +105,6 @@ resource "aws_iam_role" "codebuild" {
       }
     ]
   })
-
-  tags = {
-    Environment = var.env
-    Application = var.app_name
-    ManagedBy   = "terraform"
-  }
 }
 
 # IAM Policy for CodeBuild

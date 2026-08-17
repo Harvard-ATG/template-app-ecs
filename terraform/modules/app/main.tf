@@ -134,16 +134,12 @@ resource "aws_ecs_task_definition" "migration" {
         { "name" : "APP_DATABASE_PASSWORD", "valueFrom" : "${local.ssm_root}/database_password" },
       ]
       logConfiguration = {
-        logDriver = "splunk"
+        logDriver = "awslogs"
         options = {
-          splunk-url              = module.constants.splunk_url
-          splunk-token            = module.constants.splunk_token
-          splunk-format           = "json"
-          splunk-index            = "soc-isites"
-          splunk-source           = "atg-${local.app_name}-${local.env}"
-          splunk-sourcetype       = "python"
-          splunk-insecureskipverify = "true"
-          tag                     = "{{.Name}}"
+          "awslogs-group"         = "/ecs/${local.app_name}-${local.env}/migration"
+          "awslogs-region"        = local.region
+          "awslogs-stream-prefix" = "migration"
+          "awslogs-create-group"  = "true"
         }
       }
     }

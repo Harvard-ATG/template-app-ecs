@@ -3,9 +3,9 @@ output "ecr_repository_url" {
   value       = module.ecr.repository_url
 }
 
-output "api_service_name" {
-  description = "Name of the API ECS service"
-  value       = module.template_app.api_service_name
+output "api_service_arn" {
+  description = "ARN of the API ECS service"
+  value       = module.template_app.api_service_arn
 }
 
 output "domain_name" {

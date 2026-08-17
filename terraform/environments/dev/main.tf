@@ -27,7 +27,7 @@ module "codebuild" {
   
   env                    = local.env
   app_name               = local.app_name
-  git_repo               = "git@github.com:Harvard-ATG/template-app-ecs.git"  # Update with your actual repo URL
+  git_repo               = "https://github.com/Harvard-ATG/template-app-ecs.git"
   git_version            = "main"
   ecr_repository_url     = module.ecr.repository_url
   dockerfile_path        = "packages/api/Dockerfile"
@@ -51,9 +51,9 @@ module "template_app" {
   database_name     = var.database_name
   database_username = var.database_username
   
-  # Redis is optional - comment out the next line to disable ElastiCache
-  redis_endpoint = module.elasticache.endpoint
-  # redis_endpoint = ""  # Uncomment this and comment line above to disable Redis
+  # Redis is optional - uncomment the module below to enable
+  # redis_endpoint = module.elasticache.endpoint
+  redis_endpoint = ""  # No Redis - sessions stored in PostgreSQL
   
   load_balancer = {
     security_group_id  = data.terraform_remote_state.shared.outputs.lb_sg_id
@@ -90,21 +90,22 @@ module "rds" {
 }
 
 ## ---- ELASTICACHE REDIS (OPTIONAL) ----
-# Comment out this entire module block to disable Redis
+# Redis is DISABLED by default - sessions are stored in PostgreSQL
+# Uncomment the module below to enable Redis for caching/sessions
 
-module "elasticache" {
-  source = "../../modules/elasticache"
-  
-  env      = local.env
-  app_name = local.app_name
-  
-  # Instance sizing
-  node_type       = var.redis_node_type
-  num_cache_nodes = 1
-  
-  # Dev-specific settings
-  snapshot_retention_limit = 5
-  
-  # Allow ECS tasks to connect
-  allowed_security_group_id = module.template_app.ecs_security_group_id
-}
+# module "elasticache" {
+#   source = "../../modules/elasticache"
+#   
+#   env      = local.env
+#   app_name = local.app_name
+#   
+#   # Instance sizing
+#   node_type       = var.redis_node_type
+#   num_cache_nodes = 1
+#   
+#   # Dev-specific settings
+#   snapshot_retention_limit = 5
+#   
+#   # Allow ECS tasks to connect
+#   allowed_security_group_id = module.template_app.ecs_security_group_id
+# }

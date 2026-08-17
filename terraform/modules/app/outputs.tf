@@ -1,6 +1,6 @@
-output "api_service_name" {
-  description = "Name of the API ECS service"
-  value       = module.ecs_app_api.service_name
+output "api_service_arn" {
+  description = "ARN of the API ECS service"
+  value       = module.ecs_app_api.service_arn
 }
 
 output "api_task_definition_arn" {
@@ -25,7 +25,7 @@ output "ecs_security_group_id" {
 
 output "domain_name" {
   description = "Domain name for the application"
-  value       = module.route53.route_53_record_name
+  value       = module.route53.record_name
 }
 
 output "api_task_role_arn" {
