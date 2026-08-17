@@ -28,7 +28,7 @@ resource "random_password" "master_password" {
 
 # Store the password in AWS Systems Manager Parameter Store
 resource "aws_ssm_parameter" "database_password" {
-  name        = "/${var.env}/${var.app_name}/database_password"
+  name        = "/${var.env}/${var.app_name}-api/database_password"
   description = "RDS master password for ${var.app_name} ${var.env}"
   type        = "SecureString"
   value       = random_password.master_password.result

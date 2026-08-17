@@ -100,8 +100,9 @@ module "ecs_app_api" {
     priority             = 100
   }
 
-  splunk_sourcetype = "python"
-  tags              = local.tags
+  # Disable Splunk logging - use CloudWatch Logs instead (configured in container logConfiguration above)
+  # splunk_sourcetype = "python"
+  tags = local.tags
 }
 
 ## ---- ROUTE53 DNS ----

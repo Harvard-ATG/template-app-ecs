@@ -39,10 +39,18 @@ class Settings(BaseSettings):
     temperature: float = Field(default=0.7)
     
     # CORS
-    allowed_origins: list[str] = Field(
-        default_factory=lambda: ["http://localhost:3000"],
-        description="CORS allowed origins"
+    allowed_origins: str | list[str] = Field(
+        default="http://localhost:3000",
+        description="CORS allowed origins (comma-separated string or list)"
     )
+    
+    @computed_field
+    @property
+    def allowed_origins_list(self) -> list[str]:
+        """Get allowed origins as a list."""
+        if isinstance(self.allowed_origins, str):
+            return [origin.strip() for origin in self.allowed_origins.split(",")]
+        return self.allowed_origins
     
     @computed_field
     @property
