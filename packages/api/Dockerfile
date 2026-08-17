@@ -1,5 +1,6 @@
 # Multi-stage build for FastAPI API
-FROM python:3.13-slim AS builder
+# Use AWS ECR Public to avoid Docker Hub rate limits
+FROM public.ecr.aws/docker/library/python:3.13-slim AS builder
 
 WORKDIR /build
 
@@ -14,7 +15,7 @@ WORKDIR /build/packages/api
 RUN uv pip install --system .
 
 # Production stage
-FROM python:3.13-slim
+FROM public.ecr.aws/docker/library/python:3.13-slim
 
 WORKDIR /app
 
