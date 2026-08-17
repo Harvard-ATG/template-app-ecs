@@ -1,6 +1,6 @@
 # Terraform Infrastructure
 
-This directory contains Terraform configuration for deploying template-app-ecs to AWS ECS, following the [atg-ops-appserver](https://github.huit.harvard.edu/ATG/atg-ops-appserver) pattern.
+This directory contains Terraform configuration for deploying template-app-ecs to AWS ECS, following the [atg-ops-appserver](https://github.com/Harvard-ATG/atg-ops-appserver) pattern.
 
 ## Architecture
 

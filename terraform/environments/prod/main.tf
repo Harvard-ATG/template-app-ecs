@@ -18,7 +18,7 @@ data "terraform_remote_state" "shared" {
 }
 
 module "ecr" {
-  source          = "git::https://github.huit.harvard.edu/ATG/atg-ops-appserver.git//terraform/modules/reusable/ecr?ref=main"
+  source          = "git::https://github.com/Harvard-ATG/atg-ops-appserver.git//terraform/modules/reusable/ecr?ref=main"
   repository_name = local.app_name
 }
 
