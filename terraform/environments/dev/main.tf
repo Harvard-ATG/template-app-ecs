@@ -17,9 +17,14 @@ data "terraform_remote_state" "shared" {
   }
 }
 
-module "ecr" {
+module "ecr_api" {
   source          = "git::https://github.com/Harvard-ATG/atg-ops-appserver.git//terraform/modules/reusable/ecr?ref=main"
-  repository_name = local.app_name
+  repository_name = "${local.app_name}-api"
+}
+
+module "ecr_web" {
+  source          = "git::https://github.com/Harvard-ATG/atg-ops-appserver.git//terraform/modules/reusable/ecr?ref=main"
+  repository_name = "${local.app_name}-web"
 }
 
 module "codebuild" {
@@ -29,8 +34,7 @@ module "codebuild" {
   app_name               = local.app_name
   git_repo               = "https://github.com/Harvard-ATG/template-app-ecs.git"
   git_version            = "main"
-  ecr_repository_url     = module.ecr.repository_url
-  dockerfile_path        = "packages/api/Dockerfile"
+  ecr_repository_name    = local.app_name
   buildspec_path         = "buildspec.yml"
   build_ssh_key_ssm_path = "/${local.env}/${local.app_name}/build_ssh_key"
 }
@@ -43,7 +47,8 @@ module "template_app" {
   env          = local.env
   app_name     = local.app_name
   cluster_name = data.terraform_remote_state.shared.outputs.ecs_cluster_name
-  image        = "${module.ecr.repository_url}:${local.image_tag}"
+  image_api    = "${module.ecr_api.repository_url}:${local.image_tag}"
+  image_web    = "${module.ecr_web.repository_url}:${local.image_tag}"
   task_count   = local.task_count
   
   # Database and Redis endpoints will be provided by modules below

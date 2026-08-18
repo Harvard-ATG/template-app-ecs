@@ -42,13 +42,8 @@ resource "aws_codebuild_project" "main" {
     }
 
     environment_variable {
-      name  = "ECR_REPOSITORY_URL"
-      value = var.ecr_repository_url
-    }
-
-    environment_variable {
-      name  = "DOCKERFILE_PATH"
-      value = var.dockerfile_path
+      name  = "ECR_REPOSITORY_NAME"
+      value = var.ecr_repository_name
     }
 
     environment_variable {

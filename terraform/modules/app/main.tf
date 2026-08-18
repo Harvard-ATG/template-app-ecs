@@ -1,21 +1,23 @@
 locals {
-  region         = data.aws_region.current.name
-  account        = data.aws_caller_identity.current.account_id
-  env            = var.env
-  app_name       = var.app_name
-  app_name_short = var.app_name_short
-  cluster_name   = var.cluster_name
-  image          = var.image
-  exposed_port   = 8000
-  task_cpu       = var.task_cpu
-  task_memory    = var.task_memory
-  task_count     = var.task_count
-  load_balancer  = var.load_balancer
-  tags           = module.constants.default_tags
+  region            = data.aws_region.current.name
+  account           = data.aws_caller_identity.current.account_id
+  env               = var.env
+  app_name          = var.app_name
+  app_name_short    = var.app_name_short
+  cluster_name      = var.cluster_name
+  image_api         = var.image_api
+  image_web         = var.image_web
+  exposed_port_api  = 8000
+  exposed_port_web  = 3000
+  task_cpu          = var.task_cpu
+  task_memory       = var.task_memory
+  task_count        = var.task_count
+  load_balancer     = var.load_balancer
+  tags              = module.constants.default_tags
   route53_zone_name = var.route53_zone_name != "" ? var.route53_zone_name : module.constants.default_route53_zone
-  domain_name    = var.domain_name != "" ? var.domain_name : "${var.app_name}.${local.route53_zone_name}"
+  domain_name       = var.domain_name != "" ? var.domain_name : "${var.app_name}.${local.route53_zone_name}"
   # SSM parameters are stored at /{env}/{app_name}-api/* to match IAM policy from ecs-app module
-  ssm_root       = "arn:aws:ssm:${local.region}:${local.account}:parameter/${local.env}/${local.app_name}-api"
+  ssm_root          = "arn:aws:ssm:${local.region}:${local.account}:parameter/${local.env}/${local.app_name}-api"
 }
 
 data "aws_caller_identity" "current" {}
@@ -47,13 +49,13 @@ module "ecs_app_api" {
   containers = [
     {
       name      = "api"
-      image     = local.image
+      image     = local.image_api
       essential = true
       linuxParameters = {
         initProcessEnabled = true
       }
       portMappings = [{
-        containerPort = local.exposed_port
+        containerPort = local.exposed_port_api
       }]
       environment = concat([
         { "name" : "APP_ENVIRONMENT", "value" : local.env },
@@ -105,6 +107,63 @@ module "ecs_app_api" {
   tags = local.tags
 }
 
+## ---- FRONTEND SERVICE ----
+
+module "ecs_app_web" {
+  source         = "git::https://github.com/Harvard-ATG/atg-ops-appserver.git//terraform/modules/reusable/ecs-app?ref=main"
+  env            = local.env
+  app_name       = "${local.app_name}-web"
+  app_name_short = "${local.app_name_short}-web"
+  domain_names   = ["${local.app_name}.${local.route53_zone_name}"]
+  cluster_name   = local.cluster_name
+  task_count     = local.task_count
+  task_cpu       = local.task_cpu
+  task_memory    = local.task_memory
+  containers = [
+    {
+      name      = "web"
+      image     = local.image_web
+      essential = true
+      linuxParameters = {
+        initProcessEnabled = true
+      }
+      portMappings = [{
+        containerPort = local.exposed_port_web
+      }]
+      environment = [
+        { "name" : "NODE_ENV", "value" : "production" },
+        { "name" : "API_BASE_URL", "value" : "https://${local.domain_name}" },
+        { "name" : "NEXT_PUBLIC_API_URL", "value" : "https://${local.domain_name}" },
+      ]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = "/ecs/${local.app_name}-web-${local.env}"
+          "awslogs-region"        = local.region
+          "awslogs-stream-prefix" = "ecs"
+          "awslogs-create-group"  = "true"
+        }
+      }
+    }
+  ]
+  network_config = {
+    vpc_id              = module.network_data.vpc_id
+    private_subnet_ids  = module.network_data.private_subnet_ids
+    allowed_cidr_blocks = module.network_data.vpn_private_cidr_blocks
+  }
+  load_balancer_config = {
+    security_group_id    = local.load_balancer.security_group_id
+    https_listener_arn   = local.load_balancer.https_listener_arn
+    health_check_path    = "/"
+    health_check_matcher = "200"
+    path_patterns        = ["/*"]
+    priority             = 200  # Lower priority than API (higher number = lower priority)
+  }
+
+  # Disable Splunk logging - use CloudWatch Logs instead
+  tags = local.tags
+}
+
 ## ---- ROUTE53 DNS ----
 
 module "route53" {
@@ -130,7 +189,7 @@ resource "aws_ecs_task_definition" "migration" {
   container_definitions = jsonencode([
     {
       name      = "migration"
-      image     = local.image
+      image     = local.image_api
       essential = true
       command   = ["migrate"]
       linuxParameters = {

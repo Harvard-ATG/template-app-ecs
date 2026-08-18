@@ -19,15 +19,9 @@ variable "git_version" {
   default     = "main"
 }
 
-variable "ecr_repository_url" {
-  description = "ECR repository URL for pushing images"
+variable "ecr_repository_name" {
+  description = "Base ECR repository name (will build -api and -web suffixed repos)"
   type        = string
-}
-
-variable "dockerfile_path" {
-  description = "Path to Dockerfile relative to repository root"
-  type        = string
-  default     = "Dockerfile"
 }
 
 variable "build_ssh_key_ssm_path" {

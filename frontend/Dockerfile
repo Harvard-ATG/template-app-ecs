@@ -1,5 +1,6 @@
 # Multi-stage build for Next.js frontend
-FROM node:22-slim AS builder
+# Use AWS ECR Public to avoid Docker Hub rate limits
+FROM public.ecr.aws/docker/library/node:22-slim AS builder
 
 WORKDIR /build
 
@@ -16,7 +17,7 @@ COPY frontend .
 RUN npm run build
 
 # Production stage
-FROM node:22-slim
+FROM public.ecr.aws/docker/library/node:22-slim
 
 WORKDIR /app
 

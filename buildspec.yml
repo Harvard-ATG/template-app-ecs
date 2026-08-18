@@ -1,8 +1,8 @@
 version: 0.2
 
 # Custom buildspec for template-app-ecs
-# Removes Docker Hub dependency - uses unauthenticated pulls from Docker Hub
-# If you hit rate limits (100 pulls per 6 hours), add Docker Hub credentials
+# Builds both API and frontend Docker images
+# Uses AWS ECR Public to avoid Docker Hub rate limits
 
 env:
   parameter-store:
@@ -40,7 +40,7 @@ phases:
       - COMMIT_HASH=$(git rev-parse HEAD | cut -c 1-7)
       - IMAGE_TAG=${COMMIT_HASH:=latest}
       - DATE_TAG=$(date '+%Y-%m-%dT%H-%M-%S')
-      - echo "Image will be tagged with - latest, $IMAGE_TAG, $DATE_TAG, $VERSION_IN_USE_TAG"
+      - echo "Images will be tagged with - latest, $IMAGE_TAG, $DATE_TAG, $VERSION_IN_USE_TAG"
       
       # Login to ECR
       - echo "Logging into ECR..."
@@ -48,27 +48,57 @@ phases:
 
   build:
     commands:
-      - echo "Building Docker image..."
+      - echo "Building Docker images..."
       - cd $CODEBUILD_SRC_DIR/repo/
+      
+      # Build API image
+      - echo "Building API image..."
       - >
-        docker build --file $DOCKERFILE_PATH
+        docker build --file packages/api/Dockerfile
         --label "org.opencontainers.image.created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
         --label "org.opencontainers.image.revision=$COMMIT_HASH"
         --label "org.opencontainers.image.version=$VERSION_IN_USE_TAG"
         --label "org.opencontainers.image.source=$GIT_REPO"
-        --tag $ECR_REPOSITORY_URL:$IMAGE_TAG .
+        --tag ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-api:$IMAGE_TAG .
       
-      # Tag with multiple tags
-      - docker tag $ECR_REPOSITORY_URL:$IMAGE_TAG $ECR_REPOSITORY_URL:latest
-      - docker tag $ECR_REPOSITORY_URL:$IMAGE_TAG $ECR_REPOSITORY_URL:$DATE_TAG
-      - docker tag $ECR_REPOSITORY_URL:$IMAGE_TAG $ECR_REPOSITORY_URL:$VERSION_IN_USE_TAG
+      # Tag API image with multiple tags
+      - docker tag ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-api:$IMAGE_TAG ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-api:latest
+      - docker tag ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-api:$IMAGE_TAG ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-api:$DATE_TAG
+      - docker tag ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-api:$IMAGE_TAG ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-api:$VERSION_IN_USE_TAG
+      
+      # Build Frontend image
+      - echo "Building Frontend image..."
+      - >
+        docker build --file frontend/Dockerfile
+        --label "org.opencontainers.image.created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+        --label "org.opencontainers.image.revision=$COMMIT_HASH"
+        --label "org.opencontainers.image.version=$VERSION_IN_USE_TAG"
+        --label "org.opencontainers.image.source=$GIT_REPO"
+        --tag ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-web:$IMAGE_TAG .
+      
+      # Tag Frontend image with multiple tags
+      - docker tag ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-web:$IMAGE_TAG ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-web:latest
+      - docker tag ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-web:$IMAGE_TAG ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-web:$DATE_TAG
+      - docker tag ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-web:$IMAGE_TAG ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-web:$VERSION_IN_USE_TAG
 
   post_build:
     commands:
       - echo "Pushing images to ECR..."
-      - docker push $ECR_REPOSITORY_URL:latest
-      - docker push $ECR_REPOSITORY_URL:$IMAGE_TAG
-      - docker push $ECR_REPOSITORY_URL:$DATE_TAG
-      - docker push $ECR_REPOSITORY_URL:$VERSION_IN_USE_TAG
+      
+      # Push API images
+      - echo "Pushing API images..."
+      - docker push ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-api:latest
+      - docker push ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-api:$IMAGE_TAG
+      - docker push ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-api:$DATE_TAG
+      - docker push ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-api:$VERSION_IN_USE_TAG
+      
+      # Push Frontend images
+      - echo "Pushing Frontend images..."
+      - docker push ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-web:latest
+      - docker push ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-web:$IMAGE_TAG
+      - docker push ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-web:$DATE_TAG
+      - docker push ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-web:$VERSION_IN_USE_TAG
+      
       - echo "Build completed successfully!"
-      - echo "Images available with tags - latest, $IMAGE_TAG, $DATE_TAG, $VERSION_IN_USE_TAG"
+      - echo "API images available with tags - latest, $IMAGE_TAG, $DATE_TAG, $VERSION_IN_USE_TAG"
+      - echo "Frontend images available with tags - latest, $IMAGE_TAG, $DATE_TAG, $VERSION_IN_USE_TAG"

@@ -20,8 +20,13 @@ variable "cluster_name" {
   type        = string
 }
 
-variable "image" {
-  description = "Docker image URI"
+variable "image_api" {
+  description = "API Docker image URI"
+  type        = string
+}
+
+variable "image_web" {
+  description = "Web/Frontend Docker image URI"
   type        = string
 }
 

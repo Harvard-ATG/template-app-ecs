@@ -3,9 +3,19 @@ output "api_service_arn" {
   value       = module.ecs_app_api.service_arn
 }
 
+output "web_service_arn" {
+  description = "ARN of the Web/Frontend ECS service"
+  value       = module.ecs_app_web.service_arn
+}
+
 output "api_task_definition_arn" {
   description = "ARN of the API task definition"
   value       = module.ecs_app_api.task_definition_arn
+}
+
+output "web_task_definition_arn" {
+  description = "ARN of the Web task definition"
+  value       = module.ecs_app_web.task_definition_arn
 }
 
 output "migration_task_definition_arn" {
