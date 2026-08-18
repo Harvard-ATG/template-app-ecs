@@ -18,12 +18,12 @@ data "terraform_remote_state" "shared" {
 }
 
 module "ecr_api" {
-  source          = "git::https://github.com/Harvard-ATG/atg-ops-appserver.git//terraform/modules/reusable/ecr?ref=main"
+  source          = "../../modules/vendor/ecr"
   repository_name = "${local.app_name}-api"
 }
 
 module "ecr_web" {
-  source          = "git::https://github.com/Harvard-ATG/atg-ops-appserver.git//terraform/modules/reusable/ecr?ref=main"
+  source          = "../../modules/vendor/ecr"
   repository_name = "${local.app_name}-web"
 }
 

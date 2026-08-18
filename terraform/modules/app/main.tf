@@ -24,12 +24,12 @@ data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 module "network_data" {
-  source = "git::https://github.com/Harvard-ATG/atg-ops-appserver.git//terraform/modules/reusable/network-data?ref=main"
+  source = "../vendor/network-data"
   env    = var.env
 }
 
 module "constants" {
-  source  = "git::https://github.com/Harvard-ATG/atg-ops-appserver.git//terraform/modules/reusable/constants?ref=main"
+  source  = "../vendor/constants"
   env     = var.env
   product = var.app_name
 }
@@ -37,7 +37,7 @@ module "constants" {
 ## ---- API SERVICE ----
 
 module "ecs_app_api" {
-  source         = "git::https://github.com/Harvard-ATG/atg-ops-appserver.git//terraform/modules/reusable/ecs-app?ref=main"
+  source         = "../vendor/ecs-app"
   env            = local.env
   app_name       = "${local.app_name}-api"
   app_name_short = "${local.app_name_short}-api"
@@ -110,7 +110,7 @@ module "ecs_app_api" {
 ## ---- FRONTEND SERVICE ----
 
 module "ecs_app_web" {
-  source         = "git::https://github.com/Harvard-ATG/atg-ops-appserver.git//terraform/modules/reusable/ecs-app?ref=main"
+  source         = "../vendor/ecs-app"
   env            = local.env
   app_name       = "${local.app_name}-web"
   app_name_short = "${local.app_name_short}-web"
@@ -234,7 +234,7 @@ resource "aws_lb_listener_rule" "web" {
 ## ---- ROUTE53 DNS ----
 
 module "route53" {
-  source               = "git::https://github.com/Harvard-ATG/atg-ops-appserver.git//terraform/modules/reusable/route53?ref=main"
+  source               = "../vendor/route53"
   route_53_record_name = local.domain_name
   route_53_zone_name   = local.route53_zone_name
   lb_dns_name          = local.load_balancer.dns_name

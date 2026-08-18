@@ -7,13 +7,13 @@ data "aws_caller_identity" "current" {}
 
 # Get network information
 module "network_data" {
-  source = "git::https://github.com/Harvard-ATG/atg-ops-appserver.git//terraform/modules/reusable/network-data?ref=main"
+  source = "../vendor/network-data"
   env    = var.env
 }
 
-# Get tagging constants
+# Get environment constants (default tags, etc)
 module "constants" {
-  source  = "git::https://github.com/Harvard-ATG/atg-ops-appserver.git//terraform/modules/reusable/constants?ref=main"
+  source  = "../vendor/constants"
   env     = var.env
   product = var.app_name
 }

@@ -17,9 +17,14 @@ data "terraform_remote_state" "shared" {
   }
 }
 
-module "ecr" {
-  source          = "git::https://github.com/Harvard-ATG/atg-ops-appserver.git//terraform/modules/reusable/ecr?ref=main"
-  repository_name = local.app_name
+module "ecr_api" {
+  source          = "../../modules/vendor/ecr"
+  repository_name = "${local.app_name}-api"
+}
+
+module "ecr_web" {
+  source          = "../../modules/vendor/ecr"
+  repository_name = "${local.app_name}-web"
 }
 
 ## ---- APPLICATION MODULE ----
@@ -30,7 +35,8 @@ module "template_app" {
   env          = local.env
   app_name     = local.app_name
   cluster_name = data.terraform_remote_state.shared.outputs.ecs_cluster_name
-  image        = "${module.ecr.repository_url}:${local.image_tag}"
+  image_api    = "${module.ecr_api.repository_url}:${local.image_tag}"
+  image_web    = "${module.ecr_web.repository_url}:${local.image_tag}"
   task_count   = local.task_count
   task_cpu     = "512"
   task_memory  = "1024"

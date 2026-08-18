@@ -1,6 +1,20 @@
 # Terraform Infrastructure
 
-This directory contains Terraform configuration for deploying template-app-ecs to AWS ECS, following the [atg-ops-appserver](https://github.com/Harvard-ATG/atg-ops-appserver) pattern.
+This directory contains Terraform configuration for deploying template-app-ecs to AWS ECS. It uses vendored reusable modules from [atg-ops-appserver](https://github.com/Harvard-ATG/atg-ops-appserver), making this repository **completely self-contained** with no external dependencies.
+
+## Module Architecture
+
+This Terraform configuration uses:
+- **Local vendored modules** (`modules/vendor/`) - No external git dependencies
+- **Custom modules** (`modules/app/`, `modules/rds/`, etc.) - Application-specific configuration
+
+The vendored modules (originally from atg-ops-appserver) are included directly in this repository to ensure:
+- ✅ Anyone can use this template without access to private repositories
+- ✅ No network dependencies during `terraform init`
+- ✅ Full control over module versions and customization
+- ✅ Guaranteed compatibility and stability
+
+See `modules/vendor/README.md` for details on the vendored modules.
 
 ## Architecture
 
