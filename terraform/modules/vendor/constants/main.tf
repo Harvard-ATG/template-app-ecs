@@ -3,7 +3,8 @@ locals {
   resource_prefix = "${var.department}-${var.product}-${var.env}"
 
   # Default Route53 zone name based on environment
-  # Defaults to "example.com" for production, and "<env>.example.com" for non-production environments
+  # REQUIRED: Update with your organization's domain structure
+  # Example: "example.com" for production, "<env>.example.com" for non-production
   default_route53_zone = var.env != "prod" ? "${var.env}.example.com" : "example.com"
 
   # Default AWS region for resources
