@@ -41,7 +41,7 @@ module "ecs_app_api" {
   env            = local.env
   app_name       = "${local.app_name}-api"
   app_name_short = "${local.app_name_short}-api"
-  domain_names   = ["${local.app_name}.${local.route53_zone_name}"]
+  domain_names   = []  # Disable module's ALB rule creation - we'll create custom rules below
   cluster_name   = local.cluster_name
   task_count     = local.task_count
   task_cpu       = local.task_cpu
@@ -114,7 +114,7 @@ module "ecs_app_web" {
   env            = local.env
   app_name       = "${local.app_name}-web"
   app_name_short = "${local.app_name_short}-web"
-  domain_names   = ["${local.app_name}.${local.route53_zone_name}"]
+  domain_names   = []  # Disable module's ALB rule creation - we'll create custom rules below
   cluster_name   = local.cluster_name
   task_count     = local.task_count
   task_cpu       = local.task_cpu
@@ -161,6 +161,73 @@ module "ecs_app_web" {
   }
 
   # Disable Splunk logging - use CloudWatch Logs instead
+  tags = local.tags
+}
+
+## ---- CUSTOM ALB LISTENER RULES ----
+# Create path-based routing rules manually since the ecs-app module doesn't
+# properly handle path_patterns when multiple services share the same domain
+
+# Data sources to get the target groups created by the ecs-app modules
+data "aws_lb_target_group" "api" {
+  name = "atg-${local.app_name_short}-api-${local.env}-ecs-tg"
+  
+  depends_on = [module.ecs_app_api]
+}
+
+data "aws_lb_target_group" "web" {
+  name = "atg-${local.app_name_short}-web-${local.env}-ecs-tg"
+  
+  depends_on = [module.ecs_app_web]
+}
+
+# API Rule: Match /api/* paths
+resource "aws_lb_listener_rule" "api" {
+  listener_arn = local.load_balancer.https_listener_arn
+  priority     = 100
+
+  action {
+    type             = "forward"
+    target_group_arn = data.aws_lb_target_group.api.arn
+  }
+
+  condition {
+    host_header {
+      values = [local.domain_name]
+    }
+  }
+
+  condition {
+    path_pattern {
+      values = ["/api/*"]
+    }
+  }
+
+  tags = local.tags
+}
+
+# Web Rule: Match /* paths (catch-all)
+resource "aws_lb_listener_rule" "web" {
+  listener_arn = local.load_balancer.https_listener_arn
+  priority     = 200  # Lower priority than API (higher number = evaluated later)
+
+  action {
+    type             = "forward"
+    target_group_arn = data.aws_lb_target_group.web.arn
+  }
+
+  condition {
+    host_header {
+      values = [local.domain_name]
+    }
+  }
+
+  condition {
+    path_pattern {
+      values = ["/*"]
+    }
+  }
+
   tags = local.tags
 }
 
