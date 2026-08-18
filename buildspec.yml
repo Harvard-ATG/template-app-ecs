@@ -59,12 +59,12 @@ phases:
         --label "org.opencontainers.image.revision=$COMMIT_HASH"
         --label "org.opencontainers.image.version=$VERSION_IN_USE_TAG"
         --label "org.opencontainers.image.source=$GIT_REPO"
-        --tag ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-api:$IMAGE_TAG .
+        --tag ${ECR_REGISTRY}/atg/${ECR_REPOSITORY_NAME}-api:$IMAGE_TAG .
       
       # Tag API image with multiple tags
-      - docker tag ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-api:$IMAGE_TAG ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-api:latest
-      - docker tag ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-api:$IMAGE_TAG ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-api:$DATE_TAG
-      - docker tag ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-api:$IMAGE_TAG ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-api:$VERSION_IN_USE_TAG
+      - docker tag ${ECR_REGISTRY}/atg/${ECR_REPOSITORY_NAME}-api:$IMAGE_TAG ${ECR_REGISTRY}/atg/${ECR_REPOSITORY_NAME}-api:latest
+      - docker tag ${ECR_REGISTRY}/atg/${ECR_REPOSITORY_NAME}-api:$IMAGE_TAG ${ECR_REGISTRY}/atg/${ECR_REPOSITORY_NAME}-api:$DATE_TAG
+      - docker tag ${ECR_REGISTRY}/atg/${ECR_REPOSITORY_NAME}-api:$IMAGE_TAG ${ECR_REGISTRY}/atg/${ECR_REPOSITORY_NAME}-api:$VERSION_IN_USE_TAG
       
       # Build Frontend image
       - echo "Building Frontend image..."
@@ -74,12 +74,12 @@ phases:
         --label "org.opencontainers.image.revision=$COMMIT_HASH"
         --label "org.opencontainers.image.version=$VERSION_IN_USE_TAG"
         --label "org.opencontainers.image.source=$GIT_REPO"
-        --tag ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-web:$IMAGE_TAG .
+        --tag ${ECR_REGISTRY}/atg/${ECR_REPOSITORY_NAME}-web:$IMAGE_TAG .
       
       # Tag Frontend image with multiple tags
-      - docker tag ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-web:$IMAGE_TAG ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-web:latest
-      - docker tag ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-web:$IMAGE_TAG ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-web:$DATE_TAG
-      - docker tag ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-web:$IMAGE_TAG ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-web:$VERSION_IN_USE_TAG
+      - docker tag ${ECR_REGISTRY}/atg/${ECR_REPOSITORY_NAME}-web:$IMAGE_TAG ${ECR_REGISTRY}/atg/${ECR_REPOSITORY_NAME}-web:latest
+      - docker tag ${ECR_REGISTRY}/atg/${ECR_REPOSITORY_NAME}-web:$IMAGE_TAG ${ECR_REGISTRY}/atg/${ECR_REPOSITORY_NAME}-web:$DATE_TAG
+      - docker tag ${ECR_REGISTRY}/atg/${ECR_REPOSITORY_NAME}-web:$IMAGE_TAG ${ECR_REGISTRY}/atg/${ECR_REPOSITORY_NAME}-web:$VERSION_IN_USE_TAG
 
   post_build:
     commands:
@@ -87,17 +87,17 @@ phases:
       
       # Push API images
       - echo "Pushing API images..."
-      - docker push ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-api:latest
-      - docker push ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-api:$IMAGE_TAG
-      - docker push ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-api:$DATE_TAG
-      - docker push ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-api:$VERSION_IN_USE_TAG
+      - docker push ${ECR_REGISTRY}/atg/${ECR_REPOSITORY_NAME}-api:latest
+      - docker push ${ECR_REGISTRY}/atg/${ECR_REPOSITORY_NAME}-api:$IMAGE_TAG
+      - docker push ${ECR_REGISTRY}/atg/${ECR_REPOSITORY_NAME}-api:$DATE_TAG
+      - docker push ${ECR_REGISTRY}/atg/${ECR_REPOSITORY_NAME}-api:$VERSION_IN_USE_TAG
       
       # Push Frontend images
       - echo "Pushing Frontend images..."
-      - docker push ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-web:latest
-      - docker push ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-web:$IMAGE_TAG
-      - docker push ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-web:$DATE_TAG
-      - docker push ${ECR_REGISTRY}/${ECR_REPOSITORY_NAME}-web:$VERSION_IN_USE_TAG
+      - docker push ${ECR_REGISTRY}/atg/${ECR_REPOSITORY_NAME}-web:latest
+      - docker push ${ECR_REGISTRY}/atg/${ECR_REPOSITORY_NAME}-web:$IMAGE_TAG
+      - docker push ${ECR_REGISTRY}/atg/${ECR_REPOSITORY_NAME}-web:$DATE_TAG
+      - docker push ${ECR_REGISTRY}/atg/${ECR_REPOSITORY_NAME}-web:$VERSION_IN_USE_TAG
       
       - echo "Build completed successfully!"
       - echo "API images available with tags - latest, $IMAGE_TAG, $DATE_TAG, $VERSION_IN_USE_TAG"
