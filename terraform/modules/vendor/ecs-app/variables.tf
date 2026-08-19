@@ -128,8 +128,8 @@ variable "splunk_enabled" {
 
 variable "splunk_url" {
   type        = string
-  description = "The harvard splunk endpoint URL for logging. This is where the application will send its logs for monitoring and analysis."
-  default     = "https://http-inputs-harvard.splunkcloud.com"
+  description = "The Splunk endpoint URL for logging. This is where the application will send its logs for monitoring and analysis."
+  default     = "https://your-splunk-instance.splunkcloud.com"
 }
 
 variable "splunk_index" {

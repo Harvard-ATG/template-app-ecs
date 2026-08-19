@@ -1,6 +1,6 @@
 # Vendor Modules
 
-This directory contains vendored copies of reusable Terraform modules originally from the [Harvard-ATG/atg-ops-appserver](https://github.com/Harvard-ATG/atg-ops-appserver) repository.
+This directory contains vendored copies of reusable Terraform modules originally from the atg-ops-appserver repository.
 
 ## ⚠️ IMPORTANT: Configuration Required
 
@@ -48,7 +48,7 @@ These modules are copied locally to make this template repository **self-contain
 
 ## Source
 
-Originally sourced from: `git::https://github.com/Harvard-ATG/atg-ops-appserver.git//terraform/modules/reusable/*?ref=main`
+Originally sourced from: atg-ops-appserver repository
 
 Copied and sanitized on: 2026-08-18
 

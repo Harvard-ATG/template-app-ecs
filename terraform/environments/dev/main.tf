@@ -32,7 +32,7 @@ module "codebuild" {
   
   env                    = local.env
   app_name               = local.app_name
-  git_repo               = "https://github.com/Harvard-ATG/template-app-ecs.git"
+  git_repo               = "https://github.com/your-org/template-app-ecs.git"
   git_version            = "main"
   ecr_repository_name    = local.app_name
   buildspec_path         = "buildspec.yml"
