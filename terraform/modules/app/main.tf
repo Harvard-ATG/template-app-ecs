@@ -103,7 +103,7 @@ module "ecs_app_api" {
   }
 
   # Disable Splunk logging - use CloudWatch Logs instead (configured in container logConfiguration above)
-  # splunk_sourcetype = "python"
+  splunk_enabled = false
   tags = local.tags
 }
 
@@ -161,6 +161,7 @@ module "ecs_app_web" {
   }
 
   # Disable Splunk logging - use CloudWatch Logs instead
+  splunk_enabled = false
   tags = local.tags
 }
 
